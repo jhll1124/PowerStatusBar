@@ -36,12 +36,12 @@ public class HookMain implements IXposedHookLoadPackage {
     private static Handler mainHandler = null;
     private static int lastColor = 0;
 
-    private static boolean USE_MILLIWATT = false;
+    private static boolean USE_mW = false; // true=使用mW/W, false=仅用W
     private static boolean TEXT_BOLD = true;
-    private static final int UPDATE_INTERVAL_MS = 1500;
-    private static final int TEXT_SP = 8;
-    private static final int MARGIN_END_DP = 200;
-    private static final int TOP_MARGIN_DP = 2;
+    private static final int UPDATE_INTERVAL_MS = 1500; // 每次刷新间隔（ms）
+    private static final int TEXT_SP = 8; // 字体大小（sp）
+    private static final int MARGIN_END_DP = 200; // 右侧 margin（dp）
+    private static final int TOP_MARGIN_DP = 2; // 顶部 margin（dp）
     private static final int TEXT_GRAVITY = Gravity.END; // Gravity.CENTER / Gravity.END
 
     @Override
@@ -320,7 +320,7 @@ public class HookMain implements IXposedHookLoadPackage {
         if (pmw == Long.MIN_VALUE) return "--";
         boolean neg = pmw < 0;
         long ap = Math.abs(pmw);
-        if (USE_MILLIWATT) {
+        if (USE_mW) {
             if (ap < 1000) {
                 return (neg?"+":"-") + ap + "mW";
             } else {

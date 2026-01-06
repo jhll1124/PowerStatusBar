@@ -40,7 +40,7 @@ public class HookMain implements IXposedHookLoadPackage {
     private static boolean TEXT_BOLD = true;
     private static final int UPDATE_INTERVAL_MS = 1500; // 每次刷新间隔（ms）
     private static final int TEXT_SP = 8; // 字体大小（sp）
-    private static final int MARGIN_END_DP = 200; // 右侧 margin（dp）
+    private static final int MARGIN_END_DP = 200; // 横向 margin（dp）
     private static final int TOP_MARGIN_DP = 2; // 顶部 margin（dp）
     private static final int TEXT_GRAVITY = Gravity.END; // Gravity.CENTER / Gravity.END
 
@@ -53,20 +53,20 @@ public class HookMain implements IXposedHookLoadPackage {
         mainHandler = new Handler(Looper.getMainLooper());
 
         final String[] candidates = new String[]{
-                "com.android.systemui.statusbar.phone.PhoneStatusBarView",
-                "com.android.systemui.statusbar.phone.StatusBarWindowView",
-                "com.android.systemui.statusbar.phone.StatusBar",
-                "com.android.systemui.statusbar.StatusBarView"
+                "com.android.systemui.statusbar.phone.MiuiPhoneStatusBarView",
+                "com.android.systemui.statusbar.phone.PhoneStatusBarView"
         };
 
         Class<?> targetClass = null;
         for (String name : candidates) {
             try {
                 targetClass = XposedHelpers.findClassIfExists(name, lpparam.classLoader);
-                if (targetClass != null) break;
+                if (targetClass != null) {
+                    logInfo("hook class: " + name);
+                    break;
+                }
             } catch (Throwable t) {}
         }
-
         if (targetClass == null) {
             logError("no statusbar class found");
             return;
@@ -87,10 +87,20 @@ public class HookMain implements IXposedHookLoadPackage {
                             try {
                                 if (powerView != null && tempView != null) return; // 防重复
 
+                                // 定义 ViewGroup
                                 clockView = findClockView(sb);
+                                // 定义目标父容器
                                 LinearLayout container = new LinearLayout(ctx);
                                 container.setOrientation(LinearLayout.VERTICAL);
                                 container.setGravity(TEXT_GRAVITY);
+//                                String hookview = "phone_status_bar_left_container";
+//                                ViewGroup niaGroup = sb.findViewById(sb.getResources().getIdentifier(hookview, "id", "com.android.systemui"));
+//                                if (niaGroup == null) {
+//                                    niaGroup = sb; // 找不到就回归根 ViewGroup
+//                                    logInfo("no " + hookview + " found, fallback to hook root group");
+//                                } else {
+//                                    logInfo("hook ViewGroup: " + hookview);
+//                                }
 
                                 tempView = new TextView(ctx);
                                 tempView.setTextSize(TypedValue.COMPLEX_UNIT_SP, TEXT_SP);
@@ -113,6 +123,30 @@ public class HookMain implements IXposedHookLoadPackage {
                                     powerView.setTextColor(lastColor);
                                     tempView.setTextColor(lastColor);
                                 }
+
+//                                try {
+//                                    // tempView
+//                                    FrameLayout.LayoutParams lpTemp = new FrameLayout.LayoutParams(
+//                                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+//                                            Gravity.END | Gravity.CENTER_VERTICAL
+//                                    );
+//                                    lpTemp.setMargins(dpToPx(ctx, MARGIN_END_DP), dpToPx(ctx, TOP_MARGIN_DP), 0, 0);
+//                                    niaGroup.addView(tempView, lpTemp);
+//
+//                                    // powerView
+//                                    FrameLayout.LayoutParams lpPower = new FrameLayout.LayoutParams(
+//                                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT,
+//                                            Gravity.END | Gravity.CENTER_VERTICAL
+//                                    );
+//                                    lpPower.setMargins(dpToPx(ctx, MARGIN_END_DP), dpToPx(ctx, TOP_MARGIN_DP + dpToPx(ctx, 10)), 0, 0); // 第二行稍微下移
+//                                    niaGroup.addView(powerView, lpPower);
+//
+//                                } catch (Throwable t) {
+//                                    try {
+//                                        niaGroup.addView(tempView, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+//                                        niaGroup.addView(powerView, new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+//                                    } catch (Throwable e) {}
+//                                }
 
                                 container.addView(tempView);
                                 container.addView(powerView);
@@ -205,7 +239,7 @@ public class HookMain implements IXposedHookLoadPackage {
                 }
             }
         }, 0, UPDATE_INTERVAL_MS, TimeUnit.MILLISECONDS);
-        logInfo("Scheduler started");
+        // logInfo("Scheduler started");
     }
 
     private static void stopScheduler() {

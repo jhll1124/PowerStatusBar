@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+
+    <!-- 电池主体 - 水平居中 -->
+    <path
+        android:fillColor="#4CAF50"
+        android:strokeColor="#2E7D32"
+        android:strokeWidth="2"
+        android:pathData="M10,14h28a3,3 0 0 1 3,3v14a3,3 0 0 1 -3,3h-28a3,3 0 0 1 -3,-3v-14a3,3 0 0 1 3,-3z"/>
+
+    <!-- 电池触点 - 随主体移动 -->
+    <path
+        android:fillColor="#2E7D32"
+        android:pathData="M38,20h4v8h-4z"/>
+
+    <!-- 内部波动折线 - 同步调整位置 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M14,26l6,-6l6,8l6,-10l4,6"/>
+</vector>
